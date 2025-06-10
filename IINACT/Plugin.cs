@@ -6,6 +6,7 @@ using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using IINACT.TextToSpeech;
 using IINACT.Windows;
 
 namespace IINACT;
@@ -33,7 +34,7 @@ public sealed class Plugin : IDalamudPlugin
     public static IPluginLog Log { get; private set; } = null!;
 
     internal Configuration Configuration { get; }
-    private TextToSpeechProvider TextToSpeechProvider { get; }
+    internal TextToSpeechProvider TextToSpeechProvider { get; }
     private MainWindow MainWindow { get; }
     internal FileDialogManager FileDialogManager { get; }
     private GameServerTime GameServerTime { get; }
@@ -45,6 +46,8 @@ public sealed class Plugin : IDalamudPlugin
     internal string OverlayPluginStatus => OverlayPlugin.Status;
     private PluginLogTraceListener PluginLogTraceListener { get; }
     private HttpClient HttpClient { get; }
+
+    internal EdgeTTSWindow? EdgeTTSWindow { get; private set; }
 
     public Plugin(IDalamudPluginInterface pluginInterface,
                   ICommandManager commandManager,
@@ -92,7 +95,10 @@ public sealed class Plugin : IDalamudPlugin
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(PluginInterface);
 
-        this.TextToSpeechProvider = new TextToSpeechProvider();
+        this.TextToSpeechProvider = new TextToSpeechProvider(Log);
+        this.TextToSpeechProvider.SetUseEdgeTTS(Configuration.UseEdgeTTS);
+        EdgeTTSWindow = new EdgeTTSWindow(TextToSpeechProvider.GetEdgeTTSManager()!);
+        WindowSystem.AddWindow(EdgeTTSWindow);
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
         FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui, Framework, Condition);
@@ -234,5 +240,10 @@ public sealed class Plugin : IDalamudPlugin
     private void LeavePvP()
     {
         Configuration.DisableWritingPvpLogFile = false;
+    }
+
+    internal void OpenEdgeTTSWindow()
+    {
+        EdgeTTSWindow?.Show();
     }
 }

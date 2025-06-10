@@ -28,6 +28,9 @@ public class Configuration : IPluginConfiguration
 
     public bool ShowDebug { get; set; }
 
+    [JsonProperty("useEdgeTTS")]
+    public bool UseEdgeTTS { get; set; }
+
     public string LogFilePath
     {
         get => Directory.Exists(logFilePath) ? logFilePath : DefaultLogFilePath;

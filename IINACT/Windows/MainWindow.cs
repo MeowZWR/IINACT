@@ -45,6 +45,7 @@ public class MainWindow : Window, IDisposable
         DrawMainWindow();
         DrawParseSettings();
         DrawWebSocketSettings();
+        DrawTTSSettings();
     }
 
     private void DrawMainWindow()
@@ -258,6 +259,34 @@ public class MainWindow : Window, IDisposable
         }
 
         OverlayPluginConfig?.Save();
+    }
+
+    private void DrawTTSSettings()
+    {
+        using var tab = ImRaii.TabItem("TTS");
+        if (!tab) return;
+
+        ImGui.Spacing();
+        var useEdgeTTS = Plugin.Configuration.UseEdgeTTS;
+        if (ImGui.Checkbox("使用EdgeTTS", ref useEdgeTTS))
+        {
+            Plugin.Configuration.UseEdgeTTS = useEdgeTTS;
+            Plugin.Configuration.Save();
+            Plugin.TextToSpeechProvider.SetUseEdgeTTS(useEdgeTTS);
+        }
+
+        if (useEdgeTTS)
+        {
+            ImGui.SameLine();
+            if (ImGui.Button("EdgeTTS设置"))
+            {
+                Plugin.OpenEdgeTTSWindow();
+            }
+        }
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
     }
 
 }
