@@ -7,3 +7,4 @@
 [submodule "EdgeTTS"]
 	path = EdgeTTS
 	url = https://github.com/MeowZWR/EdgeTTS.git
+	branch = iinact
