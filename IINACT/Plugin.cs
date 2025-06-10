@@ -95,9 +95,9 @@ public sealed class Plugin : IDalamudPlugin
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(PluginInterface);
 
-        this.TextToSpeechProvider = new TextToSpeechProvider(Log);
+        this.TextToSpeechProvider = new TextToSpeechProvider(Log, PluginInterface.ConfigFile.FullName);
         this.TextToSpeechProvider.SetUseEdgeTTS(Configuration.UseEdgeTTS);
-        EdgeTTSWindow = new EdgeTTSWindow(TextToSpeechProvider.GetEdgeTTSManager()!);
+        EdgeTTSWindow = new EdgeTTSWindow(TextToSpeechProvider.GetEdgeTTSManager()!, this);
         WindowSystem.AddWindow(EdgeTTSWindow);
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 

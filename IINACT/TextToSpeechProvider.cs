@@ -16,7 +16,7 @@ internal class TextToSpeechProvider
     private bool useEdgeTTS = false;
     private readonly IPluginLog _log;
     
-    public TextToSpeechProvider(IPluginLog log)
+    public TextToSpeechProvider(IPluginLog log, string configPath)
     {
         _log = log;
         try
@@ -31,7 +31,7 @@ internal class TextToSpeechProvider
 
         try
         {
-            edgeTTSManager = new EdgeTTSManager(log);
+            edgeTTSManager = new EdgeTTSManager(log, configPath);
         }
         catch (Exception ex)
         {

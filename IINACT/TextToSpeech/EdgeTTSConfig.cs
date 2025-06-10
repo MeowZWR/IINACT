@@ -20,6 +20,9 @@ public class EdgeTTSConfig
     [JsonProperty("voice")]
     public string Voice { get; set; } = "zh-CN-XiaoxiaoNeural";
 
+    [JsonProperty("customCachePath")]
+    public string? CustomCachePath { get; set; }
+
     [JsonProperty("textReplacements")]
     public Dictionary<string, string> TextReplacements { get; set; } = new()
     {
@@ -51,9 +54,6 @@ public class EdgeTTSConfig
         var directory = Path.GetDirectoryName(configPath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
             Directory.CreateDirectory(directory);
-
-        // 在保存之前清理所有键为空的替换规则
-        TextReplacements = TextReplacements.Where(kv => !string.IsNullOrEmpty(kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value);
 
         var json = JsonConvert.SerializeObject(this, Formatting.Indented);
         File.WriteAllText(configPath, json);

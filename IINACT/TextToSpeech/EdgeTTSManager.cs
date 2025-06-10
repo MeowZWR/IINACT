@@ -7,23 +7,32 @@ namespace IINACT.TextToSpeech;
 public class EdgeTTSManager
 {
     private readonly string _configPath;
-    private readonly string _cachePath;
+    private string _cachePath = string.Empty;
     private readonly EdgeTTSConfig _config;
-    private readonly EdgeTTSEngine _engine;
+    private EdgeTTSEngine _engine;
     private readonly object _lock = new();
     private readonly IPluginLog _log;
 
-    public EdgeTTSManager(IPluginLog log)
+    public string CurrentCachePath => _cachePath;
+
+    public EdgeTTSManager(IPluginLog log, string configPath)
     {
         _log = log;
-        var configDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "XIVLauncherCN", "pluginConfigs", "IINACT");
-        _configPath = Path.Combine(configDir, "Notification", "TextToSpeech.json");
-        _cachePath = Path.Combine(configDir, "Notification", "Cache");
+        _configPath = Path.Combine(Path.GetDirectoryName(configPath)!, "IINACT", "Notification", "TextToSpeech.json");
+        _config = EdgeTTSConfig.Load(_configPath);
         
+        UpdateCachePath(_config.CustomCachePath);
+    }
+
+    private void UpdateCachePath(string? customPath)
+    {
+        _cachePath = string.IsNullOrEmpty(customPath)
+            ? Path.Combine(Path.GetDirectoryName(_configPath)!, "Cache")
+            : customPath;
+
         if (!Directory.Exists(_cachePath))
             Directory.CreateDirectory(_cachePath);
 
-        _config = EdgeTTSConfig.Load(_configPath);
         _engine = new EdgeTTSEngine(_cachePath, message => _log.Debug($"EdgeTTS: {message}"));
     }
 
@@ -31,8 +40,14 @@ public class EdgeTTSManager
     {
         lock (_lock)
         {
+            var oldCachePath = _config.CustomCachePath;
             updateAction(_config);
             _config.Save(_configPath);
+
+            if (oldCachePath != _config.CustomCachePath)
+            {
+                UpdateCachePath(_config.CustomCachePath);
+            }
         }
     }
 
@@ -52,8 +67,7 @@ public class EdgeTTSManager
     {
         try
         {
-            var files = Directory.GetFiles(_cachePath, "*.mp3");
-            foreach (var file in files)
+            foreach (var file in Directory.GetFiles(_cachePath, "*.mp3"))
             {
                 try
                 {
@@ -61,13 +75,13 @@ public class EdgeTTSManager
                 }
                 catch
                 {
-                    // Ignore errors when deleting individual files
+                    // 忽略单个文件删除失败的情况
                 }
             }
         }
         catch
         {
-            // Ignore errors when cleaning up cache
+            // 忽略缓存清理失败的情况
         }
     }
 
@@ -85,6 +99,33 @@ public class EdgeTTSManager
         catch (Exception ex)
         {
             _log.Error(ex, $"无法打开缓存文件夹: {_cachePath}");
+        }
+    }
+
+    public void MigrateCacheFiles(string newPath)
+    {
+        try
+        {
+            if (!Directory.Exists(newPath))
+                Directory.CreateDirectory(newPath);
+
+            foreach (var file in Directory.GetFiles(_cachePath, "*.mp3"))
+            {
+                try
+                {
+                    var fileName = Path.GetFileName(file);
+                    var destPath = Path.Combine(newPath, fileName);
+                    File.Move(file, destPath, true);
+                }
+                catch
+                {
+                    // 忽略单个文件迁移失败的情况
+                }
+            }
+        }
+        catch
+        {
+            // 忽略整体迁移失败的情况
         }
     }
 } 

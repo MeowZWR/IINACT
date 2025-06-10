@@ -2,15 +2,20 @@ using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using System.Numerics;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Interface.Components;
+using Dalamud.Interface;
 
 namespace IINACT.TextToSpeech;
 
 public class EdgeTTSWindow : Window
 {
     private readonly EdgeTTSManager _manager;
-    private readonly object _lock = new();
+    private bool _shouldMigrateFiles;
+    private readonly Plugin _plugin;
+    private string _newRuleFrom = "";
+    private string _newRuleTo = "";
 
-    public EdgeTTSWindow(EdgeTTSManager manager) : base("EdgeTTS设置")
+    public EdgeTTSWindow(EdgeTTSManager manager, Plugin plugin) : base("EdgeTTS设置")
     {
         SizeConstraints = new WindowSizeConstraints
         {
@@ -19,6 +24,7 @@ public class EdgeTTSWindow : Window
         };
 
         _manager = manager;
+        _plugin = plugin;
     }
 
     public void Show()
@@ -32,10 +38,8 @@ public class EdgeTTSWindow : Window
         var voices = _manager.GetAvailableVoices();
         var devices = _manager.GetAvailableDevices();
 
-        // 两列布局
         ImGui.Columns(2, "EdgeTTSSettingsColumns", true);
 
-        // --- 左列：语音选择 ---
         ImGui.Separator();
 
         using (var child = ImRaii.Child("VoiceListChild", new Vector2(ImGui.GetContentRegionAvail().X, -1), true))
@@ -59,7 +63,6 @@ public class EdgeTTSWindow : Window
 
         ImGui.NextColumn();
 
-        // --- 右列：其他设置 ---
         ImGui.AlignTextToFramePadding();
         ImGui.Text("测试文本");
         ImGui.SameLine();
@@ -180,6 +183,36 @@ public class EdgeTTSWindow : Window
                 ImGui.PopID();
             }
 
+            ImGui.PushID("new_rule");
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(-1);
+            ImGui.InputText("##NewFrom", ref _newRuleFrom, 100);
+
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(-1);
+            ImGui.InputText("##NewTo", ref _newRuleTo, 100);
+
+            ImGui.TableNextColumn();
+            if (string.IsNullOrEmpty(_newRuleFrom))
+            {
+                ImGui.BeginDisabled();
+                ImGui.Button("添加");
+                ImGui.EndDisabled();
+            }
+            else
+            {
+                if (ImGui.Button("添加"))
+                {
+                    var newDict = new Dictionary<string, string>(config.TextReplacements);
+                    newDict[_newRuleFrom] = _newRuleTo;
+                    _manager.UpdateConfig(c => c.TextReplacements = newDict);
+                    _newRuleFrom = "";
+                    _newRuleTo = "";
+                }
+            }
+            ImGui.PopID();
+
             ImGui.EndTable();
 
             if (toRemove >= 0)
@@ -189,13 +222,37 @@ public class EdgeTTSWindow : Window
                 _manager.UpdateConfig(c => c.TextReplacements = newDict);
             }
         }
-        
-        if (ImGui.Button("添加替换规则"))
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        ImGui.AlignTextToFramePadding();
+        ImGui.Text("缓存文件夹:");
+        ImGui.SameLine();
+        var cachePath = _manager.CurrentCachePath;
+        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - 30);
+        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(ImGuiCol.TextDisabled));
+        ImGui.InputText("##CachePath", ref cachePath, 1000, ImGuiInputTextFlags.ReadOnly);
+        ImGui.PopStyleColor();
+        ImGui.SameLine();
+        if (ImGuiComponents.DisabledButton(FontAwesomeIcon.Folder))
         {
-            var newDict = new Dictionary<string, string>(config.TextReplacements);
-            newDict[""] = "";
-            _manager.UpdateConfig(c => c.TextReplacements = newDict);
+            _plugin.FileDialogManager.OpenFolderDialog("选择缓存文件夹", (success, path) =>
+            {
+                if (!success) return;
+                if (_shouldMigrateFiles)
+                {
+                    _manager.MigrateCacheFiles(path);
+                }
+                _manager.UpdateConfig(c => c.CustomCachePath = path);
+            }, cachePath);
         }
+
+        ImGui.AlignTextToFramePadding();
+        ImGui.Checkbox("迁移现有缓存文件", ref _shouldMigrateFiles);
+        ImGui.SameLine();
+        ImGuiComponents.HelpMarker("选择新的缓存文件夹时，迁移现有缓存文件。");
 
         ImGui.Spacing();
         ImGui.Separator();
