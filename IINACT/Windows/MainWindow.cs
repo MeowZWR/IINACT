@@ -278,7 +278,7 @@ public class MainWindow : Window, IDisposable
         if (useEdgeTTS)
         {
             ImGui.SameLine();
-            if (ImGui.Button("EdgeTTS设置"))
+            if (ImGui.Button("打开设置"))
             {
                 Plugin.OpenEdgeTTSWindow();
             }

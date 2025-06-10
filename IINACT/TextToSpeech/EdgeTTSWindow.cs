@@ -1,10 +1,7 @@
-using Dalamud.Interface;
-using Dalamud.Interface.Colors;
-using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
-using EdgeTTS;
 using ImGuiNET;
 using System.Numerics;
+using Dalamud.Interface.Utility.Raii;
 
 namespace IINACT.TextToSpeech;
 
@@ -35,44 +32,91 @@ public class EdgeTTSWindow : Window
         var voices = _manager.GetAvailableVoices();
         var devices = _manager.GetAvailableDevices();
 
-        // 语音选择
-        var selectedVoiceIndex = Array.FindIndex(voices, v => v.Value == config.Voice);
-        if (ImGui.BeginCombo("语音", selectedVoiceIndex >= 0 ? voices[selectedVoiceIndex].DisplayName : "未选择"))
+        // 两列布局
+        ImGui.Columns(2, "EdgeTTSSettingsColumns", true);
+
+        // --- 左列：语音选择 ---
+        ImGui.Separator();
+
+        using (var child = ImRaii.Child("VoiceListChild", new Vector2(ImGui.GetContentRegionAvail().X, -1), true))
         {
-            for (var i = 0; i < voices.Length; i++)
+            if (child)
             {
-                if (ImGui.Selectable(voices[i].DisplayName, i == selectedVoiceIndex))
+                for (var i = 0; i < voices.Length; i++)
                 {
-                    _manager.UpdateConfig(c => c.Voice = voices[i].Value);
+                    var isSelected = voices[i].Value == config.Voice;
+                    if (ImGui.Selectable(voices[i].DisplayName, isSelected))
+                    {
+                        _manager.UpdateConfig(c => c.Voice = voices[i].Value);
+                    }
+                    if (isSelected)
+                    {
+                        ImGui.SetItemDefaultFocus();
+                    }
                 }
             }
-            ImGui.EndCombo();
         }
 
-        // 语速调节
+        ImGui.NextColumn();
+
+        // --- 右列：其他设置 ---
+        ImGui.AlignTextToFramePadding();
+        ImGui.Text("测试文本");
+        ImGui.SameLine();
+        if (ImGui.Button("朗读"))
+        {
+            Task.Run(() => _manager.Speak(config.TestText));
+        }
+        
+        var testText = config.TestText;
+        ImGui.SetNextItemWidth(-1);
+        if (ImGui.InputText("##TestTextInput", ref testText, 1000)) 
+        {
+            _manager.UpdateConfig(c => c.TestText = testText);
+        }
+        ImGui.Spacing();
+        
+        ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X);
+        ImGui.TextWrapped(testText);
+        ImGui.PopTextWrapPos();
+        ImGui.Spacing();
+
+        ImGui.AlignTextToFramePadding();
+        ImGui.Text("语速:");
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X * 0.7f);
         var speed = config.Speed;
-        if (ImGui.SliderInt("语速", ref speed, 0, 200))
+        if (ImGui.SliderInt("##SpeedSlider", ref speed, 1, 200))
         {
             _manager.UpdateConfig(c => c.Speed = speed);
         }
 
-        // 音量调节
-        var volume = config.Volume;
-        if (ImGui.SliderInt("音量", ref volume, 0, 100))
-        {
-            _manager.UpdateConfig(c => c.Volume = volume);
-        }
-
-        // 语调调节
+        ImGui.AlignTextToFramePadding();
+        ImGui.Text("语调:");
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X * 0.7f);
         var pitch = config.Pitch;
-        if (ImGui.SliderInt("语调", ref pitch, 0, 200))
+        if (ImGui.SliderInt("##PitchSlider", ref pitch, 1, 200))
         {
             _manager.UpdateConfig(c => c.Pitch = pitch);
         }
 
-        // 输出设备选择
+        ImGui.AlignTextToFramePadding();
+        ImGui.Text("音量:");
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X * 0.7f);
+        var volume = config.Volume;
+        if (ImGui.SliderInt("##VolumeSlider", ref volume, 1, 100))
+        {
+            _manager.UpdateConfig(c => c.Volume = volume);
+        }
+
+        ImGui.AlignTextToFramePadding();
+        ImGui.Text("输出设备:");
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
         var selectedDeviceIndex = devices.FindIndex(d => d.Id == config.DeviceId);
-        if (ImGui.BeginCombo("输出设备", selectedDeviceIndex >= 0 ? devices[selectedDeviceIndex].Name : "默认设备"))
+        if (ImGui.BeginCombo("##OutputDeviceCombo", selectedDeviceIndex >= 0 ? devices[selectedDeviceIndex].Name : "默认设备"))
         {
             if (ImGui.Selectable("默认设备", selectedDeviceIndex == -1))
             {
@@ -92,63 +136,60 @@ public class EdgeTTSWindow : Window
         ImGui.Separator();
         ImGui.Spacing();
 
-        // 测试文本
-        var testText = config.TestText;
-        if (ImGui.InputTextMultiline("测试文本", ref testText, 1000, new Vector2(-1, 100)))
-        {
-            _manager.UpdateConfig(c => c.TestText = testText);
-        }
-
-        if (ImGui.Button("朗读测试"))
-        {
-            Task.Run(() => _manager.Speak(testText));
-        }
-
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-
-        // 文本替换
         ImGui.Text("文本替换规则");
-        var toRemove = -1;
-        for (var i = 0; i < config.TextReplacements.Count; i++)
+        if (ImGui.BeginTable("TextReplacementTable", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.Resizable))
         {
-            var replacement = config.TextReplacements.ElementAt(i);
-            var from = replacement.Key;
-            var to = replacement.Value;
+            ImGui.TableSetupColumn(" 写作");
+            ImGui.TableSetupColumn(" 读作");
+            ImGui.TableSetupColumn(" 操作");
+            ImGui.TableHeadersRow();
 
-            ImGui.PushID(i);
-            if (ImGui.InputText("从", ref from, 100))
+            var toRemove = -1;
+            for (var i = 0; i < config.TextReplacements.Count; i++)
+            {
+                var replacement = config.TextReplacements.ElementAt(i);
+                var from = replacement.Key;
+                var to = replacement.Value;
+
+                ImGui.PushID(i);
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.SetNextItemWidth(-1);
+                if (ImGui.InputText("##From" + i, ref from, 100))
+                {
+                    var newDict = new Dictionary<string, string>(config.TextReplacements);
+                    newDict.Remove(replacement.Key);
+                    newDict[from] = to;
+                    _manager.UpdateConfig(c => c.TextReplacements = newDict);
+                }
+
+                ImGui.TableNextColumn();
+                ImGui.SetNextItemWidth(-1);
+                if (ImGui.InputText("##To" + i, ref to, 100))
+                {
+                    var newDict = new Dictionary<string, string>(config.TextReplacements);
+                    newDict[replacement.Key] = to;
+                    _manager.UpdateConfig(c => c.TextReplacements = newDict);
+                }
+
+                ImGui.TableNextColumn();
+                if (ImGui.Button("删除##" + i))
+                {
+                    toRemove = i;
+                }
+                ImGui.PopID();
+            }
+
+            ImGui.EndTable();
+
+            if (toRemove >= 0)
             {
                 var newDict = new Dictionary<string, string>(config.TextReplacements);
-                newDict.Remove(replacement.Key);
-                newDict[from] = to;
+                newDict.Remove(config.TextReplacements.ElementAt(toRemove).Key);
                 _manager.UpdateConfig(c => c.TextReplacements = newDict);
             }
-
-            ImGui.SameLine();
-            if (ImGui.InputText("到", ref to, 100))
-            {
-                var newDict = new Dictionary<string, string>(config.TextReplacements);
-                newDict[replacement.Key] = to;
-                _manager.UpdateConfig(c => c.TextReplacements = newDict);
-            }
-
-            ImGui.SameLine();
-            if (ImGui.Button("删除"))
-            {
-                toRemove = i;
-            }
-            ImGui.PopID();
         }
-
-        if (toRemove >= 0)
-        {
-            var newDict = new Dictionary<string, string>(config.TextReplacements);
-            newDict.Remove(config.TextReplacements.ElementAt(toRemove).Key);
-            _manager.UpdateConfig(c => c.TextReplacements = newDict);
-        }
-
+        
         if (ImGui.Button("添加替换规则"))
         {
             var newDict = new Dictionary<string, string>(config.TextReplacements);
@@ -160,9 +201,16 @@ public class EdgeTTSWindow : Window
         ImGui.Separator();
         ImGui.Spacing();
 
+        if (ImGui.Button("打开缓存文件夹"))
+        {
+            _manager.OpenCacheFolder();
+        }
+        ImGui.SameLine();
         if (ImGui.Button("清理缓存"))
         {
             _manager.CleanupCache();
         }
+
+        ImGui.Columns(1);
     }
 } 

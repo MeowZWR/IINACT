@@ -1,5 +1,6 @@
 using Dalamud.Plugin.Services;
 using EdgeTTS;
+using System.Diagnostics;
 
 namespace IINACT.TextToSpeech;
 
@@ -67,6 +68,23 @@ public class EdgeTTSManager
         catch
         {
             // Ignore errors when cleaning up cache
+        }
+    }
+
+    public void OpenCacheFolder()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = _cachePath,
+                UseShellExecute = true,
+                Verb = "open"
+            });
+        }
+        catch (Exception ex)
+        {
+            _log.Error(ex, $"无法打开缓存文件夹: {_cachePath}");
         }
     }
 } 
