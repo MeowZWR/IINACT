@@ -5,7 +5,7 @@
   "InternalName": "IINACT",
   "AssemblyVersion": "2.7.3.14",
   "TestingAssemblyVersion": "2.7.3.14",
-  "Description": "A plugin to run the FFXIV_ACT_Plugin in an ACT-like environment with a heavily modified port of Overlay Plugin for modern .NET",
+  "Description": "一个在类ACT环境中运行FFXIV_ACT_Plugin的插件，包含为现代.NET重写的Overlay Plugin",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/MeowZWR/IINACT",
   "Tags": [
@@ -15,12 +15,12 @@
   ],
   "DalamudApiLevel": 11,
   "LoadPriority": 0,
-  "IconUrl": "https://raw.githubusercontent.com/MeowZWR/IINACT/master/images/icon.png",
+  "IconUrl": "https://static.meowrs.com/Plugins/IINACT/icon.png",
   "Punchline": "A parsing plugin.",
   "IsHide": "False",
   "IsTestingExclusive": "False",
-  "DownloadLinkInstall": "https://github.com/MeowZWR/IINACT/releases/download/v2.7.3.14/IINACT.zip",
-  "DownloadLinkTesting": "https://github.com/MeowZWR/IINACT/releases/download/v2.7.3.14/IINACT.zip",
-  "DownloadLinkUpdate": "https://github.com/MeowZWR/IINACT/releases/download/v2.7.3.14/IINACT.zip"
+  "DownloadLinkInstall": "https://meowrs.com/https://github.com/MeowZWR/IINACT/releases/download/v2.7.3.14/IINACT.zip",
+  "DownloadLinkTesting": "https://meowrs.com/https://github.com/MeowZWR/IINACT/releases/download/v2.7.3.14/IINACT.zip",
+  "DownloadLinkUpdate": "https://meowrs.com/https://github.com/MeowZWR/IINACT/releases/download/v2.7.3.14/IINACT.zip"
 }
 ]

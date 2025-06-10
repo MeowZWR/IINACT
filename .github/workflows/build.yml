@@ -49,8 +49,9 @@ jobs:
         }
         Write-Output "RELEASE_VERSION=$($build.AssemblyVersion)" >> $env:GITHUB_ENV
         $repo.AssemblyVersion = $repo.TestingAssemblyVersion = $build.AssemblyVersion
-        $repo.DownloadLinkInstall = 'https://github.com/MeowZWR/IINACT/releases/download/v' + $repo.AssemblyVersion + '/IINACT.zip'
-        $repo.DownloadLinkTesting =  'https://github.com/MeowZWR/IINACT/releases/download/v' + $repo.TestingAssemblyVersion + '/IINACT.zip'
+        $baseUrl = "https://meowrs.com/https://github.com/MeowZWR/IINACT/releases/download/v"
+        $repo.DownloadLinkInstall = $baseUrl + $repo.AssemblyVersion + '/IINACT.zip'
+        $repo.DownloadLinkTesting = $baseUrl + $repo.TestingAssemblyVersion + '/IINACT.zip'
         $repo.DownloadLinkUpdate = $repo.DownloadLinkInstall
         $repo | ConvertTo-Json | % { "[`n" + $_ + "`n]" } | Set-Content 'repo.json'
     - name: Create Release
