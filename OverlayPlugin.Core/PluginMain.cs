@@ -61,7 +61,7 @@ namespace RainbowMage.OverlayPlugin
         {
             try
             {
-                Status = @"Init Phase 1: Infrastructure";
+                Status = @"初始化阶段1：基础设施";
 
                 this.ConfigPath = configPath;
 
@@ -90,7 +90,7 @@ namespace RainbowMage.OverlayPlugin
                 _container.Register(new Registry(_container));
                 _container.Register(new KeyboardHook(_container));
 
-                Status = @"Init Phase 1: Config";
+                Status = @"初始化阶段1：配置";
                 if (!LoadConfig())
                 {
                     _logger.Log(LogLevel.Error,
@@ -105,7 +105,7 @@ namespace RainbowMage.OverlayPlugin
 
                 SaveConfig();
 
-                Status = @"Init Phase 1: WSServer";
+                Status = @"初始化阶段1：WebSocket服务";
                 _container.Register(new ServerController(_container));
 
 #if DEBUG
@@ -113,7 +113,7 @@ namespace RainbowMage.OverlayPlugin
                 watch.Reset();
 #endif
 
-                Status = @"Init Phase 1: Legacy message bus";
+                Status = @"初始化阶段1：消息总线";
                 // プラグイン間のメッセージ関連
                 OverlayApi.BroadcastMessage += (o, e) =>
                 {
@@ -153,7 +153,7 @@ namespace RainbowMage.OverlayPlugin
 #endif
 
 
-                Status = @"Init Phase 1: Presets";
+                Status = @"初始化阶段1：预设";
                 // Load our presets
                 try
                 {
@@ -189,7 +189,7 @@ namespace RainbowMage.OverlayPlugin
                 try
                 {
                     // ** Init phase 2
-                    Status = @"Init Phase 2: Integrations";
+                    Status = @"初始化阶段2：集成";
 
                     // Initialize the parser in the second phase since it needs the FFXIV plugin.
                     // If OverlayPlugin is placed above the FFXIV plugin, it won't be available in the first
@@ -217,18 +217,18 @@ namespace RainbowMage.OverlayPlugin
 
                     _container.Register(new OverlayPluginLogLines(_container));
                     
-                    Status = @"Init Phase 2: Addons";
+                    Status = @"初始化阶段2：附加组件";
                     LoadAddons();
 
-                    Status = @"Init Phase 2: UI";
+                    Status = @"初始化阶段2：UI";
                     try
                     {
                         // Now that addons have been loaded, we can finish the overlay setup.
-                        Status = @"Init Phase 2: Overlays";
+                        Status = @"初始化阶段2：悬浮窗";
 
                         InitializeOverlays();
 
-                        Status = @"Init Phase 2: Dalamud IPC";
+                        Status = @"初始化阶段2：Dalamud IPC";
                         
                         _container.Register(new IpcHandlerController(_container));
 
@@ -236,14 +236,14 @@ namespace RainbowMage.OverlayPlugin
                         // after it's initialized and that requires the event sources to be initialized.
                         if (Config.WSServerRunning)
                         {
-                            Status = @"Init Phase 2: WSServer";
+                            Status = @"初始化阶段2：WebSocket 服务";
                             _container.Resolve<ServerController>().Start();
                         }
 
-                        Status = @"Init Phase 2: Save timer";
+                        Status = @"初始化阶段2：保存计时器";
                         _configSaveTimer.Start();
 
-                        Status = @"Initialised";
+                        Status = @"就绪";
                         // Make the log small; startup was successful and there shouldn't be any error message to show.
                     }
                     catch (Exception ex)
