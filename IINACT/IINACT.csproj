@@ -69,6 +69,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\EdgeTTS\EdgeTTS.csproj" />
         <ProjectReference Include="..\FetchDependencies\FetchDependencies.csproj" />
         <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
         <ProjectReference Include="..\machina\Machina\Machina.csproj" />
