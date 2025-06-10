@@ -6,10 +6,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       RELEASE_VERSION: '0.0.0.0'
-      DALAMUD_HOME: /tmp/dalamud
       DOTNET_NOLOGO: true
     steps:
     - uses: actions/checkout@v3
@@ -22,8 +21,10 @@ jobs:
     - name: Download Dalamud
       shell: pwsh
       run: |
+        $dalamudPath = "$env:APPDATA\XIVLauncher\addon\Hooks\dev"
+        New-Item -ItemType Directory -Force -Path $dalamudPath
         Invoke-WebRequest -Uri https://raw.githubusercontent.com/ottercorp/dalamud-distrib/refs/heads/main/stg/latest.zip -OutFile latest.zip
-        Expand-Archive -Force latest.zip /tmp/dalamud
+        Expand-Archive -Force latest.zip $dalamudPath
     - name: Build
       run: dotnet build -c release
     - name: Prepare Build Artifact
@@ -57,7 +58,7 @@ jobs:
         files: IINACT.zip
         name: IINACT ${{ env.RELEASE_VERSION }}
         tag_name: v${{ env.RELEASE_VERSION }}
-        prerelease: false
+        prerelease: true
         append_body: true
         body_path: .github/release-notices.md
         generate_release_notes: true
