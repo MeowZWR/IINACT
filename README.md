@@ -1,3 +1,7 @@
+>国服兼容方法来自B站hatoya[授人以渔](https://www.bilibili.com/opus/1045734514081398787)  
+>自然语音方法来自AtmoOmen[EdgeTTS](https://github.com/AtmoOmen/EdgeTTS)  
+>赞美开源  
+
 ![icon](https://github.com/marzent/IINACT/blob/main/images/icon.ico?raw=true)
 
 # IINACT
