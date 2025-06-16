@@ -135,7 +135,7 @@ public class MainWindow : Window, IDisposable
 
      private void DrawParseSettings()
     {
-        using var tab = ImRaii.TabItem("解析器");
+        using var tab = ImRaii.TabItem("解析设置");
         if (!tab) return;
 
         ImGui.Spacing();
@@ -156,10 +156,10 @@ public class MainWindow : Window, IDisposable
         ImGui.Spacing();
         ImGui.SetNextItemWidth(elementWidth);
         if (ImGui.BeginCombo("解析过滤器",
-                             Enum.GetName(typeof(ParseFilterMode), Plugin.Configuration.ParseFilterMode)))
+                             GetParseFilterModeText((ParseFilterMode)Plugin.Configuration.ParseFilterMode)))
         {
             foreach (var filter in Enum.GetValues<ParseFilterMode>())
-                if (ImGui.Selectable(Enum.GetName(typeof(ParseFilterMode), filter),
+                if (ImGui.Selectable(GetParseFilterModeText(filter),
                                      (ParseFilterMode)Plugin.Configuration.ParseFilterMode == filter))
                 {
                     Plugin.Configuration.ParseFilterMode = (int)filter;
@@ -289,4 +289,15 @@ public class MainWindow : Window, IDisposable
         ImGui.Spacing();
     }
 
+    private string GetParseFilterModeText(ParseFilterMode mode)
+    {
+        return mode switch
+        {
+            ParseFilterMode.None        => "无 (None)",
+            ParseFilterMode.Self        => "仅自己 (Self)",
+            ParseFilterMode.Party       => "仅小队成员 (Party)",
+            ParseFilterMode.Alliance    => "仅团队成员 (Alliance)",
+            _ => mode.ToString()
+        };
+    }
 }
