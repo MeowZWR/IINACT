@@ -25,6 +25,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     private HistoryRecord lastZoneRecord;
     private Thread logReaderThread;
     private Thread logWriterThread;
+    private bool pluginActive = true;
 
     internal volatile bool refreshTree;
 
@@ -40,37 +41,55 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         StartAfterCombatActionThread();
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool ReadThreadLock { get; set; }
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool WriteLogFile { get; set; } = true;
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool DisableWritingPvpLogFile { get; set; }
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int GlobalTimeSorter { get; set; }
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public List<ZoneData> ZoneList { get; set; } = new();
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string LogFileFilter { get; set; } = "notact*.txt";
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string LogFilePath { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public DirectoryInfo AppDataFolder { get; private set; }
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public ConcurrentQueue<string> LogQueue { get; private set; } = new();
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string CurrentZone { get; set; }
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public FFXIV_ACT_Plugin.FFXIV_ACT_Plugin FfxivPlugin { get; set; }
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public object OverlayPluginContainer { get; set; }
 
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public DateTime LastHostileTime { get; private set; }
     public object AfterCombatActionDataLock => ActGlobals.ActionDataLock;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Regex ZoneChangeRegex { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool LogPathHasCharName { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool InCombat
     {
         get => inCombat;
         set => inCombat = value;
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int TimeStampLen { get; set; }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public DateTime LastKnownTime
     {
         get
@@ -120,6 +139,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         }
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public ZoneData ActiveZone { get; set; }
 
     // Don't run anything on the non existing WinForms UI thread
@@ -352,7 +372,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         {
             using var stream = new FileStream(LogFilePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
             using var outputWriter = new StreamWriter(stream);
-            while (true)
+            while (pluginActive)
             {
                 if (!WriteLogFile || DisableWritingPvpLogFile)
                 {
@@ -392,7 +412,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         try
         {
             var logOutput = (LogOutput)FfxivPlugin._dataCollection._logOutput;
-            while (true)
+            while (pluginActive)
             {
                 string? logLine = null;
                 lock (logOutput._LogQueueLock)
@@ -431,7 +451,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     {
         try
         {
-            while (true)
+            while (pluginActive)
             {
                 while (afterActionsQueue.TryDequeue(out var masterSwing))
                 {
@@ -525,5 +545,10 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         {
             WriteExceptionLog(ex, $"sound file: {file}");
         }
+    }
+
+    internal void Exit()
+    {
+        pluginActive = false;
     }
 }

@@ -7,6 +7,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using IINACT.TextToSpeech;
+using IINACT.Network;
 using IINACT.Windows;
 
 namespace IINACT;
@@ -31,13 +32,14 @@ public sealed class Plugin : IDalamudPlugin
     internal ICondition Condition { get; }
     internal IGameInteropProvider GameInteropProvider { get; }
     internal ISigScanner SigScanner { get; }
+    internal INotificationManager NotificationManager { get; }
     public static IPluginLog Log { get; private set; } = null!;
 
     internal Configuration Configuration { get; }
     internal TextToSpeechProvider TextToSpeechProvider { get; }
     private MainWindow MainWindow { get; }
     internal FileDialogManager FileDialogManager { get; }
-    private GameServerTime GameServerTime { get; }
+    private ZoneDownHookManager ZoneDownHookManager { get; }
     private IpcProviders IpcProviders { get; }
 
     private FfxivActPluginWrapper FfxivActPluginWrapper { get; }
@@ -59,7 +61,8 @@ public sealed class Plugin : IDalamudPlugin
                   ICondition condition,
                   IPluginLog pluginLog,
                   IGameInteropProvider gameInteropProvider,
-                  ISigScanner sigScanner)
+                  ISigScanner sigScanner,
+                  INotificationManager notificationManager)
     {
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
@@ -71,13 +74,14 @@ public sealed class Plugin : IDalamudPlugin
         Condition = condition;
         GameInteropProvider = gameInteropProvider;
         SigScanner = sigScanner;
+        NotificationManager = notificationManager;
         Log = pluginLog;
 
+        var createZoneDownHookManager = Task.Run(() 
+            => new ZoneDownHookManager(NotificationManager, SigScanner, GameInteropProvider));
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
         FileDialogManager = new FileDialogManager();
-        GameServerTime = new GameServerTime(GameInteropProvider, SigScanner);
-        Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
 
         HttpClient = new HttpClient();
         
@@ -90,6 +94,7 @@ public sealed class Plugin : IDalamudPlugin
         PluginLogTraceListener = new PluginLogTraceListener();
         Trace.Listeners.Add(PluginLogTraceListener);
 
+        Advanced_Combat_Tracker.ActGlobals.Init();
         Advanced_Combat_Tracker.ActGlobals.oFormActMain = new Advanced_Combat_Tracker.FormActMain(Log);
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
@@ -122,8 +127,16 @@ public sealed class Plugin : IDalamudPlugin
 
         PluginInterface.UiBuilder.Draw += DrawUI;
         PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+        
+        if (clientState.IsPvP)
+            EnterPvP();
+        else
+            LeavePvP();
+        
         ClientState.EnterPvP += EnterPvP;
         ClientState.LeavePvP += LeavePvP;
+
+        ZoneDownHookManager = createZoneDownHookManager.Result;
     }
 
     public void Dispose()
@@ -131,7 +144,7 @@ public sealed class Plugin : IDalamudPlugin
         ClientState.EnterPvP -= EnterPvP;
         ClientState.LeavePvP -= LeavePvP;
         IpcProviders.Dispose();
-        GameServerTime.Dispose();
+        ZoneDownHookManager.Dispose();
         
         FfxivActPluginWrapper.Dispose();
         OverlayPlugin.DeInitPlugin();
@@ -143,6 +156,8 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.RemoveHandler(MainWindowCommandName);
         CommandManager.RemoveHandler(EndEncCommandName);
+
+        Advanced_Combat_Tracker.ActGlobals.Dispose();
     }
 
     private RainbowMage.OverlayPlugin.PluginMain InitOverlayPlugin()
