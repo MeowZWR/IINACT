@@ -19,13 +19,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 9.x.x
     - name: Download Dalamud
       shell: pwsh
       run: |
         $dalamudPath = "$env:APPDATA\XIVLauncher\addon\Hooks\dev"
         New-Item -ItemType Directory -Force -Path $dalamudPath
-        Invoke-WebRequest -Uri https://raw.githubusercontent.com/ottercorp/dalamud-distrib/refs/heads/main/stg/latest.zip -OutFile latest.zip
+        Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
         Expand-Archive -Force latest.zip $dalamudPath
     - name: Build
       run: dotnet build -c release
