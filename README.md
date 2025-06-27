@@ -1,6 +1,9 @@
->国服兼容方法来自B站hatoya[授人以渔](https://www.bilibili.com/opus/1045734514081398787)  
->自然语音方法来自AtmoOmen[EdgeTTS](https://github.com/AtmoOmen/EdgeTTS)  
->赞美开源  
+## 笔记
+
+>国服兼容 [授人以渔](https://www.bilibili.com/opus/1045734514081398787)  
+>自然语音 [EdgeTTS](https://github.com/AtmoOmen/EdgeTTS)  
+>ACT解析 [FFXIV_ACT_Plugin_CN](https://github.com/NewMoe-Technology/FFXIV_ACT_Plugin_CN)  
+> [opcodes.jsonc](https://github.com/OverlayPlugin/OverlayPlugin/blob/main/OverlayPlugin.Core/resources/opcodes.jsonc)  [FFXIVProcessCn.cs](https://github.com/OverlayPlugin/cactbot/blob/main/plugin/CactbotEventSource/FFXIVProcessCn.cs)  [opcodes.jsonc](https://github.com/moewcorp/FFXIVNetworkOpcodes/tree/master/output)  
 
 ![icon](https://github.com/marzent/IINACT/blob/main/images/icon.ico?raw=true)
 
