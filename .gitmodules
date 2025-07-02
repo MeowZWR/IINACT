@@ -3,7 +3,8 @@
 	url = https://github.com/marzent/machina
 [submodule "OverlayPlugin.Core/resources/act-overlays"]
 	path = OverlayPlugin.Core/resources/act-overlays
-	url = https://github.com/cking/act-overlays
+	url = https://github.com/MeowZWR/act-overlays
+	branch = cn
 [submodule "EdgeTTS"]
 	path = EdgeTTS
 	url = https://github.com/MeowZWR/EdgeTTS.git
