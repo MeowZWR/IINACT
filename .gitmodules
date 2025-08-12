@@ -1,6 +1,7 @@
 [submodule "machina"]
 	path = machina
-	url = https://github.com/marzent/machina
+	url = https://github.com/MeowZWR/machina
+	branch = cn
 [submodule "OverlayPlugin.Core/resources/act-overlays"]
 	path = OverlayPlugin.Core/resources/act-overlays
 	url = https://github.com/MeowZWR/act-overlays
