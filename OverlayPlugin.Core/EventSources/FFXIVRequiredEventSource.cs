@@ -373,6 +373,10 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         private void BuildPartyMemberResults(List<PartyMember> result, PartyListEntry[] members, PartyType partyType, bool inParty)
         {
+            if (members == null)
+            {
+                return;
+            }
             foreach (var member in members)
             {
                 if (member == null || (member.flags & 0x1) != 0x1)
@@ -545,8 +549,22 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         private bool HasPartyCompChanged(PartyListEntry[] oldList, PartyListEntry[] newList)
         {
-            // If the old list was null and the new list isn't null, they've changed, dispatch the event
-            if (oldList == null && oldList != newList)
+            // If both lists are the same reference or both null, nothing changed
+            if (ReferenceEquals(oldList, newList))
+            {
+                return false;
+            }
+            if (oldList == null && newList == null)
+            {
+                return false;
+            }
+            // If one is null and the other isn't, changed
+            if (oldList == null || newList == null)
+            {
+                return true;
+            }
+            // If lengths differ, changed
+            if (oldList.Length != newList.Length)
             {
                 return true;
             }
@@ -558,7 +576,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 if (newMember == null || oldMember == null)
                 {
                     // If one of these is null and the other isn't, they've changed, dispatch the event
-                    if (newMember != oldMember)
+                    if (!ReferenceEquals(newMember, oldMember))
                     {
                         return true;
                     }
