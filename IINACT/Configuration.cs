@@ -29,7 +29,7 @@ public class Configuration : IPluginConfiguration
     public bool ShowDebug { get; set; }
 
     [JsonProperty("useEdgeTTS")]
-    public bool UseEdgeTTS { get; set; }
+    public bool UseEdgeTTS { get; set; } = true;
 
     public string LogFilePath
     {
