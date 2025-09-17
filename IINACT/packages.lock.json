@@ -4,15 +4,9 @@
     "net9.0-windows7.0": {
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[12.0.0, )",
-        "resolved": "12.0.0",
-        "contentHash": "J5TJLV3f16T/E2H2P17ClWjtfEBPpq3yxvqW46eN36JCm6wR+EaoaYkqG9Rm5sHqs3/nK/vKjWWyvEs/jhKoXw=="
-      },
-      "Microsoft.Extensions.ObjectPool": {
-        "type": "Direct",
-        "requested": "[10.0.0-preview.5.25277.114, )",
-        "resolved": "10.0.0-preview.5.25277.114",
-        "contentHash": "6N6goQEy6nJ7M/mRe3Gqzk9sTuhf7sPJAUQEYTeHD4syDdaFSek+bTDbYlF1eobwXpxbf1qVvQk+xs1E6cfKXg=="
+        "requested": "[13.0.0, )",
+        "resolved": "13.0.0",
+        "contentHash": "Mb3cUDSK/vDPQ8gQIeuCw03EMYrej1B4J44a1AvIJ9C759p9XeqdU9Hg4WgOmlnlPe0G7ILTD32PKSUpkQNa8w=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Direct",
@@ -77,6 +71,12 @@
         "requested": "[10.0.0-preview.5.25277.114, )",
         "resolved": "10.0.0-preview.5.25277.114",
         "contentHash": "RC6WcWH1z1+fuvCOO/ylCtfB9ClyelS91CG/uVT2Jd4omPmHHtwxwee/uhVfR2dC8n2Px6XxtsUXqq8agcIdOw=="
+      },
+      "Unscrambler.XIV": {
+        "type": "Direct",
+        "requested": "[7.31.1, )",
+        "resolved": "7.31.1",
+        "contentHash": "TnNraAWRQug9JdRObG2rHxs2OIsP0zi+We+MTIUGCiC5qTzlmqW9MO4OfSzAyPZTa/qTAZxPBMlCnJBqnsUj/w=="
       },
       "Microsoft.CSharp": {
         "type": "Transitive",
@@ -461,7 +461,7 @@
         "type": "Project",
         "dependencies": {
           "Machina": "[2.3.1.3, )",
-          "Machina.FFXIV": "[2.4.0.1, )",
+          "Machina.FFXIV": "[2.4.3.1, )",
           "Microsoft.CSharp": "[4.7.0, )",
           "NetCoreServer": "[8.0.7, )",
           "OverlayPlugin.Common": "[1.0.0, )",
