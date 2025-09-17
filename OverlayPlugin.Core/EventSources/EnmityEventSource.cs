@@ -25,6 +25,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
         private IEnmityMemory enmityMemory;
         private IAggroMemory aggroMemory;
         private IEnmityHudMemory enmityHudMemory;
+        private LineInCombat lineInCombat;
 
         // General information about the target, focus target, hover target.  Also, enmity entries for main target.
         private const string EnmityTargetDataEvent = "EnmityTargetData";
@@ -68,11 +69,11 @@ namespace RainbowMage.OverlayPlugin.EventSources
             });
             RegisterCachedEventType(InCombatEvent);
 
-            var lineInCombat = container.Resolve<LineInCombat>();
-            lineInCombat.OnInCombatChanged += OnInCombatChanged;
+            this.lineInCombat = container.Resolve<LineInCombat>();
+            this.lineInCombat.OnInCombatChanged += OnInCombatChanged;
 
             EnmityTick += UpdateEnmity;
-            EnmityTick += lineInCombat.Update;
+            EnmityTick += this.lineInCombat.Update;
         }
 
         public override void Start()
@@ -92,6 +93,32 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         public override void SaveConfig(IPluginConfig config)
         {
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+
+            if (endEncounterToken != null)
+            {
+                try { endEncounterToken.Cancel(); }
+                catch { }
+                try { endEncounterToken.Dispose(); }
+                catch { }
+                endEncounterToken = null;
+            }
+
+            if (this.lineInCombat != null)
+            {
+                try { this.lineInCombat.OnInCombatChanged -= OnInCombatChanged; }
+                catch { }
+            }
+        }
+
+        public override void Dispose()
+        {
+            Stop();
+            base.Dispose();
         }
 
         private void OnInCombatChanged(object sender, InCombatArgs args)
@@ -114,13 +141,45 @@ namespace RainbowMage.OverlayPlugin.EventSources
             if (Config.EndEncounterOutOfCombat && !inGameCombat)
             {
                 endEncounterToken = new CancellationTokenSource();
+                var token = endEncounterToken.Token;
                 Task.Run(async delegate
                 {
-                    await Task.Delay(endEncounterOutOfCombatDelayMs, endEncounterToken.Token);
-                    ActGlobals.oFormActMain.Invoke((Action)(() =>
+                    try
                     {
-                        ActGlobals.oFormActMain.EndCombat(true);
-                    }));
+                        await Task.Delay(endEncounterOutOfCombatDelayMs, token).ConfigureAwait(false);
+
+                        var form = ActGlobals.oFormActMain;
+                        if (form != null && !token.IsCancellationRequested)
+                        {
+                            form.Invoke((Action)(() =>
+                            {
+                                try
+                                {
+                                    form.EndCombat(true);
+                                }
+                                catch (Exception ex)
+                                {
+                                    logger.Log(LogLevel.Warning, "EndCombat invoke failed: {0}", ex);
+                                }
+                            }));
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // ignore cancellation
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // ignore disposal during shutdown
+                    }
+                    catch (NullReferenceException)
+                    {
+                        // ignore nulls during shutdown
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Log(LogLevel.Warning, "Delayed EndEncounter task error: {0}", ex);
+                    }
                 });
             }
             // If combat starts again, cancel any outstanding tasks to stop the ACT encounter.
