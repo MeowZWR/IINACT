@@ -59,7 +59,7 @@ internal class TextToSpeechProvider
         {
             try
             {
-                Task.Run(() => edgeTTSManager.Speak(message));
+                Task.Run(async () => await edgeTTSManager.Speak(message));
             }
             catch (Exception ex)
             {

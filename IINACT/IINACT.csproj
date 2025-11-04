@@ -84,6 +84,13 @@
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="..\EdgeTTS\voices.json">
+            <Link>Resources\voices.json</Link>
+            <LogicalName>IINACT.Resources.voices.json</LogicalName>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
         <Reference Include="FFXIV_ACT_Plugin">
             <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.dll</HintPath>
             <Private>False</Private>

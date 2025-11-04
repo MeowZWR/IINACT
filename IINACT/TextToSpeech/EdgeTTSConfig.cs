@@ -1,5 +1,5 @@
+using EdgeTTS.Models;
 using Newtonsoft.Json;
-using EdgeTTS;
 
 namespace IINACT.TextToSpeech;
 

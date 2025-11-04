@@ -118,7 +118,7 @@ public class EdgeTTSWindow : Window
         ImGui.Text("输出设备:");
         ImGui.SameLine();
         ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-        var selectedDeviceIndex = devices.FindIndex(d => d.Id == config.DeviceId);
+        var selectedDeviceIndex = devices.FindIndex(d => d.ID == config.DeviceId);
         if (ImGui.BeginCombo("##OutputDeviceCombo", selectedDeviceIndex >= 0 ? devices[selectedDeviceIndex].Name : "默认设备"))
         {
             if (ImGui.Selectable("默认设备", selectedDeviceIndex == -1))
@@ -129,7 +129,7 @@ public class EdgeTTSWindow : Window
             {
                 if (ImGui.Selectable(devices[i].Name, i == selectedDeviceIndex))
                 {
-                    _manager.UpdateConfig(c => c.DeviceId = devices[i].Id);
+                    _manager.UpdateConfig(c => c.DeviceId = devices[i].ID);
                 }
             }
             ImGui.EndCombo();

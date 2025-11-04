@@ -1,5 +1,6 @@
 using Dalamud.Plugin.Services;
 using EdgeTTS;
+using EdgeTTS.Models;
 using System.Diagnostics;
 
 namespace IINACT.TextToSpeech;
@@ -9,11 +10,36 @@ public class EdgeTTSManager
     private readonly string _configPath;
     private string _cachePath = string.Empty;
     private readonly EdgeTTSConfig _config;
-    private EdgeTTSEngine _engine;
+    private EdgeTTSEngine _engine = null!;
     private readonly object _lock = new();
     private readonly IPluginLog _log;
 
     public string CurrentCachePath => _cachePath;
+
+    private void ExtractVoicesJson()
+    {
+        try
+        {
+            var assembly = typeof(EdgeTTSManager).Assembly;
+            using var stream = assembly.GetManifestResourceStream("IINACT.Resources.voices.json");
+            if (stream == null)
+            {
+                _log.Error("EdgeTTSManager: voices.json embedded resource not found");
+                return;
+            }
+
+            var voicesPath = Path.Combine(_cachePath, "voices.json");
+            using var reader = new StreamReader(stream);
+            var jsonContent = reader.ReadToEnd();
+
+            File.WriteAllText(voicesPath, jsonContent);
+            _log.Debug($"EdgeTTSManager: Extracted voices.json to {voicesPath}");
+        }
+        catch (Exception ex)
+        {
+            _log.Error(ex, "EdgeTTSManager: Failed to extract voices.json from embedded resource");
+        }
+    }
 
     public EdgeTTSManager(IPluginLog log, string configPath)
     {
@@ -33,7 +59,15 @@ public class EdgeTTSManager
         if (!Directory.Exists(_cachePath))
             Directory.CreateDirectory(_cachePath);
 
-        _engine = new EdgeTTSEngine(_cachePath, message => _log.Debug($"EdgeTTS: {message}"));
+        // Extract voices.json from embedded resource to cache directory
+        ExtractVoicesJson();
+
+        _engine = new EdgeTTSEngine
+        {
+            CacheFolder = _cachePath,
+            VoiceFolder = _cachePath, // Use cache directory as voice folder
+            LogHandler = message => _log.Debug($"EdgeTTS: {message}")
+        };
     }
 
     public void UpdateConfig(Action<EdgeTTSConfig> updateAction)
@@ -53,9 +87,16 @@ public class EdgeTTSManager
 
     public EdgeTTSConfig GetConfig() => _config;
 
-    public Voice[] GetAvailableVoices() => EdgeTTSEngine.Voices;
+    public Voice[] GetAvailableVoices() => _engine.Voices;
 
-    public List<AudioDevice> GetAvailableDevices() => EdgeTTSEngine.GetAudioDevices();
+    public List<AudioDevice> GetAvailableDevices()
+    {
+        var devices = _engine.AudioDevices;
+        return devices
+            .OrderBy(pair => pair.Key)
+            .Select(pair => pair.Value)
+            .ToList();
+    }
 
     public async Task Speak(string text)
     {
