@@ -12,7 +12,7 @@
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Version>0.19.67</Version>
+        <Version>0.19.70</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -66,6 +66,7 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+        <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.9" />
         <PackageReference Include="NetCoreServer" Version="8.0.7" />
         <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     </ItemGroup>

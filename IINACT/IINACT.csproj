@@ -2,7 +2,7 @@
     <PropertyGroup>
         <Authors>Usagi</Authors>
         <Company>Dezent</Company>
-        <Version>2.9.3.1</Version>
+        <Version>2.9.4.4</Version>
         <Description>A parsing plugin.</Description>
         <Copyright></Copyright>
         <PackageProjectUrl>https://github.com/marzent/IINACT</PackageProjectUrl>
@@ -43,11 +43,7 @@
         </PackageReference>
         <PackageReference Include="System.Speech" Version="10.0.0-preview.5.25277.114" />
         <PackageReference Include="NAudio" Version="2.2.1" />
-        <PackageReference Include="Microsoft.NETCore.Platforms" Version="8.0.0-preview.7.23375.6" />
-        <PackageReference Include="Microsoft.Win32.Primitives" Version="4.3.0" />
-        <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-        <PackageReference Include="Microsoft.NETCore.Targets" Version="6.0.0-preview.4.21253.7" />
-        <PackageReference Include="Unscrambler.XIV" Version="7.31.1" />
+		<PackageReference Include="Unscrambler.XIV" Version="7.35.1" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
@@ -58,14 +54,6 @@
         </Reference>
         <Reference Include="Dalamud">
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Reloaded.Hooks">
-            <HintPath>$(DalamudLibPath)Reloaded.Hooks.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Reloaded.Hooks.Definitions">
-            <HintPath>$(DalamudLibPath)Reloaded.Hooks.Definitions.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Dalamud.Bindings.ImGui">
