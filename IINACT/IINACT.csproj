@@ -2,7 +2,7 @@
     <PropertyGroup>
         <Authors>Usagi</Authors>
         <Company>Dezent</Company>
-        <Version>2.9.4.4</Version>
+        <Version>2.9.4.6</Version>
         <Description>A parsing plugin.</Description>
         <Copyright></Copyright>
         <PackageProjectUrl>https://github.com/marzent/IINACT</PackageProjectUrl>
@@ -41,9 +41,9 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="System.Speech" Version="10.0.0-preview.5.25277.114" />
         <PackageReference Include="NAudio" Version="2.2.1" />
-		<PackageReference Include="Unscrambler.XIV" Version="7.35.1" />
+        <PackageReference Include="System.Speech" Version="10.0.0" />
+        <PackageReference Include="Unscrambler.XIV" Version="7.38.0" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
