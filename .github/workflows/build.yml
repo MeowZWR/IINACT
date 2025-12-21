@@ -13,13 +13,13 @@ jobs:
       RELEASE_VERSION: '0.0.0.0'
       DOTNET_NOLOGO: true
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
       with:
         submodules: recursive
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 9.x.x
+        dotnet-version: "10.x.x"
     - name: Download Dalamud
       shell: pwsh
       run: |
