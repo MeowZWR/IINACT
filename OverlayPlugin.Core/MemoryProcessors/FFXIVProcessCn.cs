@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors {
   public class FFXIVProcessCn : FFXIVProcess {
-    // Last updated for FFXIV 7.3 from ShadyWhit
+    // Last updated for FFXIV 7.4 from ShadyWhite
 
     [StructLayout(LayoutKind.Explicit)]
     public unsafe struct EntityMemory {
@@ -106,8 +106,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors {
 
     // A piece of code that reads the job data.
     // The pointer of interest is the first ???????? in the signature.
-    private static String kJobDataSignature = "488B3D????????33ED";
-    private static int kJobDataSignatureOffset = -6;
+    private static String kJobDataSignature = "488D0D????????0F95C2E8????????488B8D";
+    private static int kJobDataSignatureOffset = -15;
     // The signature finds a pointer in the executable code which uses RIP addressing.
     private static bool kJobDataSignatureRIP = true;
 
