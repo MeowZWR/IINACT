@@ -57,6 +57,26 @@ public class ServerController
         return File.Exists(GetCertPath());
     }
 
+    private static bool IsAssemblyLoadContextException(Exception ex)
+    {
+        if (ex == null) return false;
+        
+        var message = ex.Message;
+        if (message.Contains("AssemblyLoadContext") || 
+            message.Contains("unloading") || 
+            message.Contains("unloaded"))
+        {
+            return true;
+        }
+        
+        if (ex.InnerException != null)
+        {
+            return IsAssemblyLoadContextException(ex.InnerException);
+        }
+        
+        return false;
+    }
+
     public void Start()
     {
         Failed = false;
@@ -75,6 +95,13 @@ public class ServerController
             Server.Start();
 
             OnStateChanged?.Invoke(this, new StateChangedArgs(true, false));
+        }
+        catch (Exception e) when (IsAssemblyLoadContextException(e))
+        {
+            Failed = true;
+            LastException = e;
+            Logger.Log(LogLevel.Error, "WebSocket 服务器启动失败: AssemblyLoadContext 正在卸载或已卸载。这通常发生在插件热重载时。请重新加载插件或重开游戏。");
+            OnStateChanged?.Invoke(this, new StateChangedArgs(false, true));
         }
         catch (Exception e)
         {
