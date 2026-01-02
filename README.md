@@ -5,7 +5,8 @@
 >ACT解析 [FFXIV_ACT_Plugin_CN](https://github.com/NewMoe-Technology/FFXIV_ACT_Plugin_CN)  
 > [opcodes.jsonc](https://github.com/OverlayPlugin/OverlayPlugin/blob/main/OverlayPlugin.Core/resources/opcodes.jsonc)  [FFXIVProcessCn.cs](https://github.com/OverlayPlugin/cactbot/blob/main/plugin/CactbotEventSource/FFXIVProcessCn.cs)  [opcodes.jsonc](https://github.com/moewcorp/FFXIVNetworkOpcodes/tree/master/output)
 
->✦请使用Latihas开发的 [IINACTEx](https://github.com/Latihas/IINACTEx)
+>作为每周神典石都打不满也不挑战logs的咸鱼，目前仅需要伤害统计和好听的自然语音TTS，所以仍会咸鱼地维护这个版本。  
+>✦请需要进阶功能的同学使用Latihas开发的 [IINACTEx](https://github.com/Latihas/IINACTEx)
 
 ![icon](https://github.com/marzent/IINACT/blob/main/images/icon.ico?raw=true)
 
