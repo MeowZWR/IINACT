@@ -5,6 +5,8 @@ using System.Diagnostics;
 
 namespace IINACT.TextToSpeech;
 
+public record Voice(string Value, string DisplayName);
+
 public class EdgeTTSManager
 {
     private readonly string _configPath;
@@ -87,7 +89,16 @@ public class EdgeTTSManager
 
     public EdgeTTSConfig GetConfig() => _config;
 
-    public Voice[] GetAvailableVoices() => _engine.Voices;
+    public Voice[] GetAvailableVoices() =>
+        _engine.Voices
+               .SelectMany(localeGroup => localeGroup.Value.SelectMany(genderGroup => genderGroup.Value))
+               .Select(voiceInfo => new Voice
+               (
+                   voiceInfo.ShortName,
+                   $"{voiceInfo.FriendlyName} ({voiceInfo.LocaleInfo.DisplayName} - {voiceInfo.GenderName})"
+               ))
+               .OrderBy(v => v.DisplayName)
+               .ToArray();
 
     public List<AudioDevice> GetAvailableDevices()
     {
