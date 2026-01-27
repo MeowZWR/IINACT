@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -374,7 +374,7 @@ namespace RainbowMage.OverlayPlugin
                     }
 
                     this.Overlays.Add((IOverlayConfig)JsonConvert.DeserializeObject(
-                                          item.ToString(Formatting.None),
+                                          item.ToString(),
                                           type,
                                           new ConfigCreationConverter(_container)
                                       ));
