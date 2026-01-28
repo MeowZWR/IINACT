@@ -4,6 +4,7 @@ using System.Numerics;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Components;
 using Dalamud.Interface;
+using System.Globalization;
 
 namespace IINACT.TextToSpeech;
 
@@ -35,7 +36,7 @@ public class EdgeTTSWindow : Window
     public override void Draw()
     {
         var config = _manager.GetConfig();
-        var voices = _manager.GetAvailableVoices();
+        var voiceEntries = _manager.GetAvailableVoiceEntries();
         var devices = _manager.GetAvailableDevices();
 
         ImGui.Columns(2, "EdgeTTSSettingsColumns", true);
@@ -46,16 +47,82 @@ public class EdgeTTSWindow : Window
         {
             if (child)
             {
-                for (var i = 0; i < voices.Length; i++)
+                // 语言优先级：中文、日语、韩语、英语，其它按显示名排序
+                static int GetLanguagePriority(string languageCode) => languageCode switch
                 {
-                    var isSelected = voices[i].Value == config.Voice;
-                    if (ImGui.Selectable(voices[i].DisplayName, isSelected))
+                    "zh" => 0,
+                    "ja" => 1,
+                    "ko" => 2,
+                    "en" => 3,
+                    _ => 100
+                };
+
+                static string GetPreferredLanguageFolderName(string languageCode, string fallbackDisplayName)
+                {
+                    var uiLang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+                    if (uiLang == "zh")
                     {
-                        _manager.UpdateConfig(c => c.Voice = voices[i].Value);
+                        return languageCode switch
+                        {
+                            "zh" => "中文",
+                            "ja" => "日语",
+                            "ko" => "韩语",
+                            "en" => "英语",
+                            _ => fallbackDisplayName
+                        };
                     }
-                    if (isSelected)
+
+                    return fallbackDisplayName;
+                }
+
+                static int GetGenderPriority(string gender) => gender switch
+                {
+                    "Female" => 0,
+                    "Male" => 1,
+                    _ => 2
+                };
+
+                var groupedByLanguage = voiceEntries
+                    .GroupBy(v => v.LanguageCode)
+                    .OrderBy(g => GetLanguagePriority(g.Key))
+                    .ThenBy(g => GetPreferredLanguageFolderName(g.Key, g.First().LanguageDisplayName))
+                    .ToArray();
+
+                foreach (var langGroup in groupedByLanguage)
+                {
+                    var langName = GetPreferredLanguageFolderName(langGroup.Key, langGroup.First().LanguageDisplayName);
+                    using var langNode = ImRaii.TreeNode($"{langName}##lang_{langGroup.Key}");
+                    if (!langNode)
+                        continue;
+
+                    var groupedByGender = langGroup
+                        .GroupBy(v => v.Gender)
+                        .OrderBy(g => GetGenderPriority(g.Key))
+                        .ThenBy(g => g.First().GenderDisplayName)
+                        .ToArray();
+
+                    foreach (var genderGroup in groupedByGender)
                     {
-                        ImGui.SetItemDefaultFocus();
+                        var genderName = genderGroup.First().GenderDisplayName;
+                        using var genderNode = ImRaii.TreeNode($"{genderName}##gender_{langGroup.Key}_{genderGroup.Key}");
+                        if (!genderNode)
+                            continue;
+
+                        foreach (var voice in genderGroup.OrderBy(v => v.FriendlyName).ThenBy(v => v.Value))
+                        {
+                            var isSelected = voice.Value == config.Voice;
+                            var label = $"{voice.FriendlyName} ({voice.LocaleDisplayName})";
+
+                            if (ImGui.Selectable(label, isSelected))
+                            {
+                                _manager.UpdateConfig(c => c.Voice = voice.Value);
+                            }
+
+                            if (isSelected)
+                            {
+                                ImGui.SetItemDefaultFocus();
+                            }
+                        }
                     }
                 }
             }

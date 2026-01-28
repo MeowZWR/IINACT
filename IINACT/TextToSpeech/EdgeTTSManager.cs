@@ -2,10 +2,22 @@ using Dalamud.Plugin.Services;
 using EdgeTTS;
 using EdgeTTS.Models;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace IINACT.TextToSpeech;
 
 public record Voice(string Value, string DisplayName);
+
+public sealed record VoiceEntry(
+    string Value,
+    string FriendlyName,
+    string Locale,
+    string LocaleDisplayName,
+    string LanguageCode,
+    string LanguageDisplayName,
+    string Gender,
+    string GenderDisplayName
+);
 
 public class EdgeTTSManager
 {
@@ -99,6 +111,57 @@ public class EdgeTTSManager
                ))
                .OrderBy(v => v.DisplayName)
                .ToArray();
+
+    public VoiceEntry[] GetAvailableVoiceEntries()
+    {
+        static string GetLanguageDisplayName(string languageCode)
+        {
+            try
+            {
+                return CultureInfo.GetCultureInfo(languageCode).DisplayName;
+            }
+            catch
+            {
+                return languageCode;
+            }
+        }
+
+        static string GetGenderDisplayName(VoiceInfo voiceInfo)
+        {
+            var uiLang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+            if (uiLang == "zh")
+            {
+                return voiceInfo.Gender switch
+                {
+                    "Male" => "男",
+                    "Female" => "女",
+                    _ => "其他"
+                };
+            }
+
+            return voiceInfo.GenderName;
+        }
+
+        return _engine.Voices
+            .SelectMany(localeGroup => localeGroup.Value.SelectMany(genderGroup => genderGroup.Value))
+            .Select(voiceInfo =>
+            {
+                var localeInfo = voiceInfo.LocaleInfo;
+                var languageCode = localeInfo.TwoLetterISOLanguageName;
+
+                return new VoiceEntry(
+                    voiceInfo.ShortName,
+                    voiceInfo.FriendlyName,
+                    voiceInfo.Locale,
+                    localeInfo.DisplayName,
+                    languageCode,
+                    GetLanguageDisplayName(languageCode),
+                    voiceInfo.Gender,
+                    GetGenderDisplayName(voiceInfo)
+                );
+            })
+            .ToArray();
+    }
 
     public List<AudioDevice> GetAvailableDevices()
     {
