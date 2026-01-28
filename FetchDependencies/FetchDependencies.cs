@@ -26,37 +26,58 @@ public class FetchDependencies
     {
         var pluginZipPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.zip");
         var pluginPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.dll");
-        var deucalionPath = Path.Combine(DependenciesDir, "deucalion-1.1.0.distrib.dll");
-        
+
         if (!NeedsUpdate(pluginPath))
             return;
 
-        if (IsChinese)
-            DownloadFile(PluginUrlChinese, pluginPath);
+        // true ：统一使用 Global ZIP 逻辑
+        // false ：国服使用独立 DLL (PluginUrlChinese)
+        bool useUnifiedGlobalZip = true; 
+
+        if (useUnifiedGlobalZip || !IsChinese)
+        {
+            HandleZipDownloadAndExtract(PluginUrlGlobal, pluginZipPath);
+        }
         else
         {
-            if (!File.Exists(pluginZipPath))
-                DownloadFile(PluginUrlGlobal, pluginZipPath);
-            try
-            {
-                ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
-            }
-            catch (InvalidDataException)
-            {
-                File.Delete(pluginZipPath);
-                DownloadFile(PluginUrlGlobal, pluginZipPath);
-                ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
-            }
-            File.Delete(pluginZipPath);
-
-            foreach (var deucalionDll in Directory.GetFiles(DependenciesDir, "deucalion*.dll"))
-                File.Delete(deucalionDll);
+            DownloadFile(PluginUrlChinese, pluginPath);
         }
+
+        CleanupDeucalion();
 
         var patcher = new Patcher(PluginVersion, DependenciesDir);
         patcher.MainPlugin();
         patcher.LogFilePlugin();
         patcher.MemoryPlugin();
+    }
+
+    private void HandleZipDownloadAndExtract(string url, string zipPath)
+    {
+        if (!File.Exists(zipPath))
+            DownloadFile(url, zipPath);
+
+        try
+        {
+            ZipFile.ExtractToDirectory(zipPath, DependenciesDir, true);
+        }
+        catch (InvalidDataException)
+        {
+            File.Delete(zipPath);
+            DownloadFile(url, zipPath);
+            ZipFile.ExtractToDirectory(zipPath, DependenciesDir, true);
+        }
+        finally
+        {
+            if (File.Exists(zipPath)) File.Delete(zipPath);
+        }
+    }
+
+    private void CleanupDeucalion()
+    {
+        foreach (var deucalionDll in Directory.GetFiles(DependenciesDir, "deucalion*.dll"))
+        {
+            try { File.Delete(deucalionDll); } catch {}
+        }
     }
 
     private bool NeedsUpdate(string dllPath)
