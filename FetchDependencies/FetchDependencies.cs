@@ -7,7 +7,7 @@ public class FetchDependencies
     private const string VersionUrlGlobal = "https://www.iinact.com/updater/version";
     private const string VersionUrlChinese = "https://cninact.diemoe.net/CN解析/版本.txt";
     private const string PluginUrlGlobal = "https://www.iinact.com/updater/download";
-    private const string PluginUrlChinese = "https://meowrs.com/https://raw.githubusercontent.com/NewMoe-Technology/FFXIV_ACT_Plugin_CN/refs/heads/main/SDK/Latest/FFXIV_ACT_Plugin.dll";
+    private const string PluginUrlChinese = "https://meowrs.com/https://raw.githubusercontent.com/NewMoe-Technology/FFXIV_ACT_Plugin_CN/refs/heads/main/SDK/2.7.4.9-CN7.41/FFXIV_ACT_Plugin.dll"; //等上游适配ACT 3.0
 
     private Version PluginVersion { get; }
     private string DependenciesDir { get; }
