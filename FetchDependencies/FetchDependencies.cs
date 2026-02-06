@@ -32,7 +32,7 @@ public class FetchDependencies
 
         // true ：统一使用 Global ZIP 逻辑
         // false ：国服使用独立 DLL (PluginUrlChinese)
-        bool useUnifiedGlobalZip = true; 
+        bool useUnifiedGlobalZip = false; 
 
         if (useUnifiedGlobalZip || !IsChinese)
         {
