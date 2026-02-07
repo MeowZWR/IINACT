@@ -45,11 +45,11 @@
         "resolved": "10.0.0",
         "contentHash": "nHlCdjoeReiSx4kzgPEwPRlbOAyuVFwndXTZZT+CLnHb8UIfB+YMgpQjQ7faYvs3xU8wyvpb6dt+U+HwdlbG7w=="
       },
-      "Unscrambler.XIV": {
+      "Unscrambler.XIV.CN": {
         "type": "Direct",
         "requested": "[7.41.1, )",
         "resolved": "7.41.1",
-        "contentHash": "IyIGPSl+zoqjJrlf4TQVdpwG02pT8bj0Evg90isRbsQ+4N7WVpzc6sCaPWILdadCd35kW1SQABWiWoSfOhEVYg=="
+        "contentHash": "w6K1mRhU4RC5z7xNrb8VBbU4kVc+wctvbaZRAydHpOmZgT5y8P5bTt56K2eSTjs+ybI2g8OSFTuFChO1kcFFpw=="
       },
       "Microsoft.Extensions.ObjectPool": {
         "type": "Transitive",
