@@ -4,9 +4,9 @@
     "net10.0-windows7.0": {
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[14.0.1, )",
-        "resolved": "14.0.1",
-        "contentHash": "y0WWyUE6dhpGdolK3iKgwys05/nZaVf4ZPtIjpLhJBZvHxkkiE23zYRo7K7uqAgoK/QvK5cqF6l3VG5AbgC6KA=="
+        "requested": "[14.0.2, )",
+        "resolved": "14.0.2",
+        "contentHash": "dQJeq+8eyHzra4Cg5eZ/3LAeS3/UpvvLriYJGSncMK9LqJ7Q4B6jwcOsxo3PfxVd15xj+IzVFxkPqIBmPQu8/w=="
       },
       "DotNet.ReproducibleBuilds": {
         "type": "Direct",
@@ -47,9 +47,9 @@
       },
       "Unscrambler.XIV.CN": {
         "type": "Direct",
-        "requested": "[7.41.1, )",
-        "resolved": "7.41.1",
-        "contentHash": "w6K1mRhU4RC5z7xNrb8VBbU4kVc+wctvbaZRAydHpOmZgT5y8P5bTt56K2eSTjs+ybI2g8OSFTuFChO1kcFFpw=="
+        "requested": "[7.45.0, )",
+        "resolved": "7.45.0",
+        "contentHash": "DYC1wJHEyXNWPP+Pbv++r/o/9YqIa6Mh4oG5Apz2lzwC9j/VnG/ISPwHJjDYDZcr7ZcDWC8Ba3LVUwbEDZ4cDw=="
       },
       "Microsoft.Extensions.ObjectPool": {
         "type": "Transitive",
