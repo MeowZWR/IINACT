@@ -38,7 +38,8 @@ public unsafe class ZoneDownHookManager : IDisposable
         var moduleBase = multiScanner.Module.BaseAddress;
         
         var version = GetRunningGameVersion();
-        if (VersionConstants.Constants.ContainsKey(version))
+        var isGlobal = Machina.FFXIV.Headers.Opcodes.OpcodeManager.Instance.GameRegion == Machina.FFXIV.GameRegion.Global;
+        if (isGlobal && VersionConstants.Constants.ContainsKey(version))
         {
             versionConstants = VersionConstants.ForGameVersion(version);
             unscrambler = UnscramblerFactory.ForGameVersion(version);
@@ -56,8 +57,9 @@ public unsafe class ZoneDownHookManager : IDisposable
             var searchRange = 0x1000;
             var memory = new byte[searchRange];
             Marshal.Copy(opcodeKeyTableAddress, memory, 0, searchRange);
+            var moduleSize = multiScanner.Module.ModuleMemorySize;
             var opcodeKeyTableSize = 0;
-            while (!IsVtablePattern(memory, opcodeKeyTableSize))
+            while (!IsModulePointer(memory, opcodeKeyTableSize, moduleBase, moduleSize))
             {
                 opcodeKeyTableSize += 4;
                 if (opcodeKeyTableSize > searchRange)
@@ -88,23 +90,11 @@ public unsafe class ZoneDownHookManager : IDisposable
 		Enable();
     }
     
-    private bool IsVtablePattern(ReadOnlySpan<byte> memory, int offset)
+    private static bool IsModulePointer(ReadOnlySpan<byte> memory, int offset, nint moduleBase, long moduleSize)
     {
-        for (var i = 1; i < 5; i++)
-            if (memory[offset + i] == 0)
-                return false;
-        
-        if (memory[offset + 6] != 0 || memory[offset + 7] != 0)
-            return false;
-        
-        for (var i = 9; i < 13; i++)
-            if (memory[offset + i] == 0)
-                return false;
-        
-        if (memory[offset + 14] != 0 || memory[offset + 15] != 0)
-            return false;
-
-        return true;
+        if (offset + 8 > memory.Length) return false;
+        var ptr = BitConverter.ToUInt64(memory.Slice(offset));
+        return ptr >= (ulong)moduleBase && ptr < (ulong)(moduleBase + moduleSize);
     }
 
 	public void Enable()
