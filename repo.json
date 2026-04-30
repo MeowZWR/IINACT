@@ -13,7 +13,7 @@
     "plugin",
     "ACT"
   ],
-  "DalamudApiLevel": 14,
+  "DalamudApiLevel": 15,
   "LoadPriority": 0,
   "IconUrl": "https://static.meowrs.com/Plugins/IINACT/icon.png",
   "Punchline": "A parsing plugin.",
