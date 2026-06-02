@@ -1,10 +1,8 @@
 using System.Speech.Synthesis;
+using System.Web;
 using Dalamud.Plugin.Services;
 using IINACT.TextToSpeech;
-using System.Net;
 using NAudio.Wave;
-using System.Threading;
-using System.IO;
 
 namespace IINACT;
 
@@ -14,19 +12,21 @@ internal class TextToSpeechProvider
     private readonly HttpClient client = new();
     private readonly SpeechSynthesizer? speechSynthesizer;
     private readonly EdgeTTSManager? edgeTTSManager;
-    private bool useEdgeTTS = false;
-    private readonly IPluginLog _log;
-    
-    public TextToSpeechProvider(IPluginLog log, string configPath)
+    private readonly Configuration configuration;
+    private readonly IPluginLog log;
+    private bool useEdgeTTS;
+
+    public TextToSpeechProvider(Configuration config, IPluginLog log, string configPath)
     {
-        _log = log;
+        configuration = config;
+        this.log = log;
         try
         {
             edgeTTSManager = new EdgeTTSManager(log, configPath);
         }
         catch (Exception ex)
         {
-            _log.Warning(ex, "Failed to initialize EdgeTTS engine");
+            log.Warning(ex, "Failed to initialize EdgeTTS engine");
         }
 
         if (!Dalamud.Utility.Util.IsWine())
@@ -38,11 +38,11 @@ internal class TextToSpeechProvider
             }
             catch (Exception ex)
             {
-                _log.Warning(ex, "Failed to initialize SAPI TTS engine");
+                log.Warning(ex, "Failed to initialize SAPI TTS engine");
                 speechSynthesizer = null;
             }
         }
-        
+
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.TextToSpeech += Speak;
     }
 
@@ -50,7 +50,7 @@ internal class TextToSpeechProvider
     {
         this.useEdgeTTS = useEdgeTTS;
     }
-    
+
     public void Speak(string message)
     {
         if (string.IsNullOrEmpty(message)) return;
@@ -63,7 +63,7 @@ internal class TextToSpeechProvider
             }
             catch (Exception ex)
             {
-                _log.Error(ex, $"EdgeTTS failed to play back {message}");
+                log.Error(ex, $"EdgeTTS failed to play back {message}");
             }
             return;
         }
@@ -72,14 +72,14 @@ internal class TextToSpeechProvider
         {
             try
             {
-                if (speechSynthesizer == null)
+                if (speechSynthesizer == null || configuration.ForceGoogleTts)
                     SpeakGoogle(message);
                 else
                     SpeakSapi(message);
             }
             catch (Exception ex)
             {
-                _log.Error(ex, $"TTS failed to play back {message}");
+                log.Error(ex, $"TTS failed to play back {message}");
             }
         });
     }
@@ -88,8 +88,9 @@ internal class TextToSpeechProvider
 
     private void SpeakGoogle(string message)
     {
-        var query = WebUtility.UrlEncode(message);
-        const string lang = "en";
+        var query = HttpUtility.UrlEncode(message);
+        var lang = configuration.GoogleTtsLanguage;
+        if (string.IsNullOrWhiteSpace(lang)) lang = "en";
         var url = $"https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl={lang}&q={query}";
         var mp3Data = client.GetByteArrayAsync(url).Result;
 
@@ -98,7 +99,7 @@ internal class TextToSpeechProvider
         using var waveOut = new WaveOutEvent();
         waveOut.Init(reader);
         var waitHandle = new ManualResetEventSlim(false);
-        
+
         lock (speechLock)
         {
             waveOut.Play();
@@ -106,7 +107,7 @@ internal class TextToSpeechProvider
             waitHandle.Wait();
         }
     }
-    
+
     private void SpeakSapi(string message)
     {
         lock (speechLock)

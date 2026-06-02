@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Text.Json.Nodes;
 
 namespace FetchDependencies;
 
@@ -32,11 +33,11 @@ public class FetchDependencies
 
         // true ：统一使用 Global ZIP 逻辑
         // false ：国服使用独立 DLL (PluginUrlChinese)
-        bool useUnifiedGlobalZip = false; 
+        bool useUnifiedGlobalZip = false;
 
         if (useUnifiedGlobalZip || !IsChinese)
         {
-            HandleZipDownloadAndExtract(PluginUrlGlobal, pluginZipPath);
+            DownloadAndExtractGlobalPlugin(pluginZipPath);
         }
         else
         {
@@ -51,24 +52,47 @@ public class FetchDependencies
         patcher.MemoryPlugin();
     }
 
-    private void HandleZipDownloadAndExtract(string url, string zipPath)
+    private void DownloadAndExtractGlobalPlugin(string pluginZipPath)
     {
-        if (!File.Exists(zipPath))
-            DownloadFile(url, zipPath);
+        if (!File.Exists(pluginZipPath))
+            DownloadGlobalPlugin(pluginZipPath);
 
         try
         {
-            ZipFile.ExtractToDirectory(zipPath, DependenciesDir, true);
+            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
         }
         catch (InvalidDataException)
         {
-            File.Delete(zipPath);
-            DownloadFile(url, zipPath);
-            ZipFile.ExtractToDirectory(zipPath, DependenciesDir, true);
+            File.Delete(pluginZipPath);
+            DownloadGlobalPlugin(pluginZipPath);
+            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
         }
-        finally
+
+        if (File.Exists(pluginZipPath))
+            File.Delete(pluginZipPath);
+    }
+
+    private void DownloadGlobalPlugin(string pluginZipPath)
+    {
+        try
         {
-            if (File.Exists(zipPath)) File.Delete(zipPath);
+            DownloadFile(PluginUrlGlobal, pluginZipPath);
+        }
+        catch
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/ravahn/FFXIV_ACT_Plugin/releases/latest");
+            request.Headers.UserAgent.ParseAdd("IINACT/1.0");
+            using var response = HttpClient.Send(request);
+            response.EnsureSuccessStatusCode();
+
+            using var stream = response.Content.ReadAsStream();
+            var json = JsonNode.Parse(stream);
+            var downloadUrl = json?["assets"]?[0]?["browser_download_url"]?.ToString();
+
+            if (string.IsNullOrEmpty(downloadUrl))
+                throw new Exception("Could not find fallback download URL from GitHub API.");
+
+            DownloadFile(downloadUrl, pluginZipPath);
         }
     }
 
@@ -89,7 +113,7 @@ public class FetchDependencies
 
             if (!plugin.ApiVersionMatches())
                 return true;
-            
+
             using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
             var remoteVersionString = HttpClient
                                       .GetStringAsync(IsChinese ? VersionUrlChinese : VersionUrlGlobal,
