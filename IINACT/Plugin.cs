@@ -110,6 +110,7 @@ public sealed class Plugin : IDalamudPlugin
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
         FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui, Framework, Condition);
+        Task.Run(() => NetworkLogCleanup.Cleanup(Configuration));
         OverlayPlugin = InitOverlayPlugin();
 
         IpcProviders = new IpcProviders(PluginInterface);
@@ -191,6 +192,7 @@ public sealed class Plugin : IDalamudPlugin
             IpcProviders.Server = WebSocketServer;
             IpcProviders.OverlayIpcHandler = container.Resolve<RainbowMage.OverlayPlugin.Handlers.Ipc.IpcHandlerController>();
             MainWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
+            MainWindow.OverlayPluginEventConfig = container.Resolve<RainbowMage.OverlayPlugin.EventSources.BuiltinEventConfig>();
         });
 
         return overlayPlugin;
@@ -245,6 +247,11 @@ public sealed class Plugin : IDalamudPlugin
     public void DrawConfigUI()
     {
         MainWindow.IsOpen = true;
+    }
+
+    internal void SetChatMessageLoggingEnabled(bool enabled)
+    {
+        FfxivActPluginWrapper.SetChatMessageLoggingEnabled(enabled);
     }
 
     private void EnterPvP()

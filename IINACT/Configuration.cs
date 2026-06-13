@@ -21,6 +21,12 @@ public class Configuration : IPluginConfiguration
     public bool DisableCombinePets { get; set; }
 
     public bool DisablePvp { get; set; }
+
+    public bool LogChatMessages { get; set; } = true;
+
+    public bool AutoDeleteNetworkLogs { get; set; }
+
+    public int NetworkLogRetentionDays { get; set; } = 30;
     
     public bool SimulateIndividualDoTCrits { get; set; }
 
@@ -62,6 +68,8 @@ public class Configuration : IPluginConfiguration
     public string GoogleTtsLanguage { get; set; } = "en";
     
     public bool ForceGoogleTts { get; set; }
+
+    public int TtsPlaybackDevice { get; set; } = -1;
 
     public void Initialize(IDalamudPluginInterface pluginInterface)
     {
