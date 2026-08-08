@@ -110,6 +110,10 @@ public sealed class Plugin : IDalamudPlugin
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
         FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui, Framework, Condition);
+        // FFXIV_ACT_Plugin network init can overwrite Machina region; re-apply CN/Global selection.
+        OpcodeManager.Instance.SetRegion(DataManager.Language.ToString() == "ChineseSimplified"
+                                             ? GameRegion.Chinese
+                                             : GameRegion.Global);
         Task.Run(() => NetworkLogCleanup.Cleanup(Configuration));
         OverlayPlugin = InitOverlayPlugin();
 
