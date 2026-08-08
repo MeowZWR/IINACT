@@ -76,9 +76,7 @@ public sealed class Plugin : IDalamudPlugin
         NotificationManager = notificationManager;
         Log = pluginLog;
 
-        OpcodeManager.Instance.SetRegion(DataManager.Language.ToString() == "ChineseSimplified"
-                                             ? GameRegion.Chinese
-                                             : GameRegion.Global);
+        ApplyMachinaRegion(DataManager.Language);
 
         var createZoneDownHookManager = Task.Run(() 
             => new ZoneDownHookManager(NotificationManager, GameInteropProvider));
@@ -110,10 +108,7 @@ public sealed class Plugin : IDalamudPlugin
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
         FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui, Framework, Condition);
-        // FFXIV_ACT_Plugin network init can overwrite Machina region; re-apply CN/Global selection.
-        OpcodeManager.Instance.SetRegion(DataManager.Language.ToString() == "ChineseSimplified"
-                                             ? GameRegion.Chinese
-                                             : GameRegion.Global);
+        ApplyMachinaRegion(DataManager.Language);
         Task.Run(() => NetworkLogCleanup.Cleanup(Configuration));
         OverlayPlugin = InitOverlayPlugin();
 
@@ -274,5 +269,13 @@ public sealed class Plugin : IDalamudPlugin
     internal void OpenEdgeTTSWindow()
     {
         EdgeTTSWindow?.Show();
+    }
+
+    private static void ApplyMachinaRegion(ClientLanguage language)
+    {
+        var region = language.ToString() == "ChineseTraditional"
+                         ? GameRegion.TraditionalChinese
+                         : GameRegion.Global;
+        OpcodeManager.Instance.SetRegion(region);
     }
 }

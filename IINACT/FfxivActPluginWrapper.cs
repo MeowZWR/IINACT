@@ -170,7 +170,7 @@ public partial class FfxivActPluginWrapper : IDisposable
         DataCollectionSettings = new DataCollectionSettingsEventArgs
         {
             LogFileFolder = ActGlobals.oFormActMain.LogFilePath,
-            RegionID = ClientLanguage == Language.Chinese ? Region.Chinese : Region.Global,
+            RegionID = Region.Global,
             ProcessID = Environment.ProcessId
         };
         settingsMediator.DataCollectionSettings = DataCollectionSettings;
