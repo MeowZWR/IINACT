@@ -57,6 +57,7 @@
     },
     "Global": {
         "2026.09.01.0000.0000": {
+            // Version: 7.56
             "MapEffect": {
                 "opcode": 177,
                 "size": 11
@@ -109,6 +110,7 @@
     },
     "Korean": {
         "2026.09.01.0000.0000": {
+            // Version: 7.56
             "MapEffect": {
                 "opcode": 177,
                 "size": 11
