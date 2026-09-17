@@ -47,9 +47,9 @@
       },
       "Unscrambler.XIV.CN": {
         "type": "Direct",
-        "requested": "[7.55.1, )",
-        "resolved": "7.55.1",
-        "contentHash": "8RE0VApgW8GzTj4FFy/gvMuaQjHV8/1siRmBggFhq9ovX9QTUIn5GAMBaN9odGNfd3OGKBbQlLALn8p8ML18sg=="
+        "requested": "[7.56.0, )",
+        "resolved": "7.56.0",
+        "contentHash": "9WEmyQHF94pjFFXZRsgFUQ+QLR4Jhc+qhRMRZLVNocaYF+usEk0sLErcEvz3dZVcwB9XG8VmM+8ISyRz5dubfA=="
       },
       "Microsoft.Extensions.ObjectPool": {
         "type": "Transitive",
