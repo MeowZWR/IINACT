@@ -273,9 +273,12 @@ public sealed class Plugin : IDalamudPlugin
 
     private static void ApplyMachinaRegion(ClientLanguage language)
     {
-        var region = language.ToString() == "ChineseTraditional"
-                         ? GameRegion.TraditionalChinese
-                         : GameRegion.Global;
+        var region = language.ToString() switch
+        {
+            "ChineseSimplified" => GameRegion.Chinese,
+            "ChineseTraditional" => GameRegion.TraditionalChinese,
+            _ => GameRegion.Global
+        };
         OpcodeManager.Instance.SetRegion(region);
     }
 }

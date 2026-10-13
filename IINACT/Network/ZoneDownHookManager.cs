@@ -13,7 +13,10 @@ namespace IINACT.Network;
 
 public unsafe class ZoneDownHookManager : IDisposable
 {
-	private const string GenericDownSignature = "E8 ?? ?? ?? ?? 4C 8B 4F 10 8B 47 1C 45";
+	// Global: call; mov r9,[rdi+10]; mov eax,[rdi+1C]
+	private const string GenericDownSignatureGlobal = "E8 ?? ?? ?? ?? 4C 8B 4F 10 8B 47 1C 45";
+	// Chinese 2026.10.06+: call; mov r8,[rdi+10]; mov r9d,[rdi+1C]
+	private const string GenericDownSignatureChinese = "E8 ?? ?? ?? ?? 4C 8B 47 10 44 8B 4F 1C 45";
     private const string OpcodeKeyTableSignature = "?? ?? ?? 2B C8 ?? 8B ?? 8A ?? ?? ?? ?? 41 81";
     private readonly int[] opcodeKeyTable;
     private readonly byte[] keys = new byte[3];
@@ -84,7 +87,8 @@ public unsafe class ZoneDownHookManager : IDisposable
         for (var i = 0; i < rawOpcodeKeyTable.Length; i += 4)
             opcodeKeyTable[i / 4] = BitConverter.ToInt32(rawOpcodeKeyTable, i);
 
-        var rxPtrs = multiScanner.ScanText(GenericDownSignature, 3);
+        var genericDownSig = isGlobal ? GenericDownSignatureGlobal : GenericDownSignatureChinese;
+        var rxPtrs = multiScanner.ScanText(genericDownSig, 3);
 		zoneDownHook = hooks.HookFromAddress<DownPrototype>(rxPtrs[2], ZoneDownDetour);
 
 		Enable();
