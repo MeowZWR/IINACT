@@ -13,8 +13,8 @@ namespace IINACT.Network;
 
 public unsafe class ZoneDownHookManager : IDisposable
 {
-	// Global: call; mov r9,[rdi+10]; mov eax,[rdi+1C]
-	private const string GenericDownSignatureGlobal = "E8 ?? ?? ?? ?? 4C 8B 4F 10 8B 47 1C 45";
+	// Global 7.57+: call; mov r9,[rsi+10]; mov eax,[rsi+1C]
+	private const string GenericDownSignatureGlobal = "E8 ?? ?? ?? ?? 4C 8B 4E 10 8B 46 1C 45";
 	// Chinese 2026.10.06+: call; mov r8,[rdi+10]; mov r9d,[rdi+1C]
 	private const string GenericDownSignatureChinese = "E8 ?? ?? ?? ?? 4C 8B 47 10 44 8B 4F 1C 45";
     private const string OpcodeKeyTableSignature = "?? ?? ?? 2B C8 ?? 8B ?? 8A ?? ?? ?? ?? 41 81";
